@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#fff7f6">
-<title>Aura BJ-1 — Bluefy V6</title>
+<title>Aura BJ-1 — Bluefy V7</title>
 <style>
 :root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#fff7f6;color:#483740}*{box-sizing:border-box}body{margin:0;padding:18px 13px 36px}main{max-width:460px;margin:auto}header{text-align:center;margin:5px 0 18px}header h1{font-size:34px;color:#b67b98;margin:0}header p{font-size:13px;color:#957b89;margin:5px 0 12px}.pill{background:#f5e3ed;border-radius:50px;font-size:12px;display:inline-block;padding:9px 14px}section{background:#fff;border:1px solid #efdce6;box-shadow:0 5px 22px #d4afc01c;border-radius:20px;padding:17px;margin:12px 0}h2{font-size:17px;margin:0 0 12px}button,.btn{border:0;border-radius:12px;padding:13px 14px;width:100%;font:inherit;font-weight:650;background:#b77e9b;color:#fff;margin:7px 0;cursor:pointer;display:block;text-align:center}button.secondary{background:#f5e6ee;color:#815870;border:1px solid #ead0de}button:disabled{opacity:.50;cursor:not-allowed}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #8d476d}small{font-size:12px;color:#927b87}.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.grid div{background:#fff7fb;border-radius:11px;padding:10px;overflow-wrap:anywhere}.grid strong{font-size:14px;display:block;padding-top:3px}.preview{display:flex;align-items:center;justify-content:center;margin:12px 0}.preview canvas{width:min(74vw,250px);height:min(74vw,250px);border-radius:50%;border:5px solid #efcade;box-shadow:0 4px 20px #ba8ca62e;background:#f6afc8}input[type=file]{width:1px;height:1px;position:absolute;opacity:0}label.file{display:block;text-align:center;background:#ab7393;color:white;padding:13px;border-radius:12px;font-weight:650;margin:8px 0}.note{font-size:13px;line-height:1.48;color:#846c78;margin:8px 0}.warning{background:#fff6df;border:1px solid #f3dba4;border-radius:11px;padding:11px;font-size:13px;line-height:1.45}.controls{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:8px 0}.controls select{border:1px solid #d8b9ca;background:#fff;border-radius:10px;padding:9px;font-size:14px;color:#584653}.controls label{font-size:13px}input[type=checkbox]{accent-color:#ae7193;width:17px;height:17px}progress{width:100%;height:15px;accent-color:#c27e9e}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#2c2630;color:#f3e0eb;padding:12px;border-radius:12px;font-size:11px;line-height:1.5;max-height:235px;overflow:auto}footer{text-align:center;color:#937985;font-size:12px;line-height:1.5;padding:12px}hr{border:0;border-top:1px solid #f1e4ea;margin:16px 0}.diagnostico{border:1px solid #e7c8d8;border-radius:12px;background:#fff7fb;color:#70445e;padding:11px;font-size:13px;line-height:1.45;margin-top:10px}.diagnostico strong{display:block;margin-bottom:4px}.diagnostico.ok{background:#f3faf5;border-color:#c2dfc9;color:#365e44}.diagnostico.error{background:#fff4eb;border-color:#efcdb1;color:#865432}.mini{font-size:12px;color:#846c78;margin:7px 0 0}.btn-foto{background:#ab7393}.flash{animation:flash .6s ease}@keyframes flash{0%{transform:scale(.98)}100%{transform:scale(1)}}
 </style>
@@ -33,7 +33,7 @@
 <progress id="progreso" max="100" value="0"></progress><p class="note" id="avance">Esperando conexión y autorización.</p>
 </section>
 <section><h2>4. Registro de diagnóstico Bluetooth</h2><pre id="registro" role="log" aria-live="polite"></pre><button id="copiar" class="secondary" type="button">Copiar diagnóstico</button><p class="note">Las fotografías permanecen dentro del navegador. No hay servidores, analíticas ni claves incluidas. Para Bluetooth en iPhone, hospeda este HTML en una dirección HTTPS privada y abre esa dirección en Bluefy. Abrir el archivo desde Descargas puede impedir el uso de Bluetooth. El visor de archivos/ChatGPT puede mostrar la interfaz sin permitir ejecutar sus botones.</p></section>
-<footer>Aura BJ-1 V6 · Prueba de dial31 no verificado · Sin OTA · Sin restablecimiento · Sin eliminación de archivos</footer>
+<footer>Aura BJ-1 V7 · Prueba de dial31 no verificado · Sin OTA · Sin restablecimiento · Sin eliminación de archivos</footer>
 </main>
 <script>
 (function () {
@@ -41,20 +41,28 @@
     var box = document.getElementById('estadoPagina');
     if (box) {
       box.className = 'diagnostico error';
-      box.textContent = 'No se pudo iniciar Aura: ' + message + '. Copia este mensaje para revisar la compatibilidad de Bluefy.';
+      box.textContent = 'Aura V7 — ' + message + '\nNavegador: ' + navigator.userAgent;
+      box.style.whiteSpace = 'pre-wrap';
     }
   }
-  window.addEventListener('error', function (event) { report(event.message || 'error de JavaScript'); });
+  window.auraReportStartup = report;
+  window.auraStartupStep = 'inicio del programa';
+  window.addEventListener('error', function (event) {
+    if (!window.auraDetailedError) report((event.message || 'error de JavaScript') + ' | Paso: ' + window.auraStartupStep + ' | Línea: ' + (event.lineno || '?') + ' | Archivo: ' + (event.filename || 'sin detalle'));
+  });
   window.addEventListener('unhandledrejection', function (event) {
     var reason = event.reason;
     report(reason && reason.message ? reason.message : String(reason || 'error inesperado'));
   });
   var box = document.getElementById('estadoPagina');
-  if (box) box.textContent = 'JavaScript disponible. Iniciando Aura V6…';
+  if (box) box.textContent = 'JavaScript disponible. Iniciando Aura V7…';
 })();
 </script>
 <script>
+(function () {
 'use strict';
+try {
+window.auraStartupStep = 'preparar lienzo';
 const UUID={svc:'7e400001-b5a3-f393-e0a9-e50e24dcca9d',write:'7e400002-b5a3-f393-e0a9-e50e24dcca9d',notify:'7e400003-b5a3-f393-e0a9-e50e24dcca9d'};
 const $=id=>document.getElementById(id);
 const cv=$('lienzo'),ctx=cv.getContext('2d');
@@ -64,7 +72,9 @@ function log(text){$('registro').textContent+=`[${new Date().toLocaleTimeString(
 function state(s){$('estado').textContent=s}
 function buttons(){const connected=!!(device && device.gatt && device.gatt.connected)&&!!writer;$('conectar').disabled=busy||connected;$('desconectar').disabled=busy||!connected;$('diagnosticar').disabled=busy||!connected;$('enviar').disabled=busy||!connected||!ready||!$('autorizar').checked;const r=$('enviarMotivo');r.textContent=busy?'Procesando operación…':!connected?'Envío bloqueado: conecta primero la BJ-1.':!$('autorizar').checked?'Envío bloqueado: marca la casilla de autorización.':!ready?'Prepara una imagen para continuar.':'Listo para intentar la transferencia experimental.';}
 function demo(){ctx.fillStyle='#f3b0c7';ctx.fillRect(0,0,360,360);ctx.fillStyle='#40303b';ctx.beginPath();ctx.ellipse(115,143,17,30,0,0,2*Math.PI);ctx.fill();ctx.beginPath();ctx.ellipse(245,143,17,30,0,0,2*Math.PI);ctx.fill();ctx.lineWidth=9;ctx.lineCap='round';ctx.strokeStyle='#40303b';ctx.beginPath();ctx.arc(180,187,42,.14,Math.PI-.14);ctx.stroke();ctx.fillStyle='#e98bad';for(const x of [72,288]){ctx.beginPath();ctx.ellipse(x,190,24,12,0,0,Math.PI*2);ctx.fill()}ready=true;$('detalle').textContent='Cara de prueba · 360 × 360 · fondo rosa sólido';buttons()}
+window.auraStartupStep = 'dibujar carita';
 demo();
+window.auraStartupStep = 'activar botones';
 function toRGB565(){const pix=ctx.getImageData(0,0,360,360).data;const out=new Uint8Array(360*360*2);let black=0;for(let i=0,p=0;i<pix.length;i+=4,p+=2){const r=pix[i],g=pix[i+1],b=pix[i+2];const c=((r>>3)<<11)|((g>>2)<<5)|(b>>3);if(c===0)black++;out[p]=c&255;out[p+1]=c>>8;}if(black===129600)throw Error('La imagen está completamente negra antes de enviar.');return out;}
 $('archivo').addEventListener('change',()=>{const f=($('archivo').files && $('archivo').files[0]);if(!f)return;if(!f.type.startsWith('image/')){log('Archivo no válido.');return;}const url=URL.createObjectURL(f);const img=new Image();img.onload=()=>{ctx.fillStyle='#fff';ctx.fillRect(0,0,360,360);const s=Math.max(360/img.naturalWidth,360/img.naturalHeight),w=img.naturalWidth*s,h=img.naturalHeight*s;ctx.drawImage(img,(360-w)/2,(360-h)/2,w,h);URL.revokeObjectURL(url);ready=true;$('detalle').textContent=`${f.name} · recortada localmente a 360 × 360 RGB565`;log('Imagen lista; aún NO enviada.');buttons()};img.onerror=()=>{URL.revokeObjectURL(url);log('No se pudo leer esa imagen.');};img.src=url});
 $('elegir').addEventListener('click',()=>{log('Abriendo selector de imágenes del iPhone…');$('archivo').click();});
@@ -122,7 +132,16 @@ function makeData(seq,part){const payload=new Uint8Array(2+part.length+4);be16(p
 function makeFinish(blob){const b=new Uint8Array(4);be32(b,0,sum(blob));return frame(0x1f,3,b);}
 $('enviar').addEventListener('click',async()=>{if(!(device && device.gatt && device.gatt.connected)||!/^BJ-1$/i.test(device.name||'')){log('Envío cancelado: debes conectar un dispositivo identificado exactamente como BJ-1.');return;}if(!$('autorizar').checked)return;busy=true;buttons();$('progreso').value=0;try{log('Iniciando prueba RGB565. Nunca enviaremos OTA ni comandos de borrado.');const raw=toRGB565();const blob=new Uint8Array(raw.length+4);be32(blob,0,raw.length);blob.set(raw,4);const pktMax=Number($('paquete').value);const chunkSize=pktMax-14;if(chunkSize<6)throw Error('Paquete demasiado pequeño.');const n=Math.ceil(blob.length/chunkSize);log(`Blob ${blob.length} bytes · ${n} bloques · GATT máximo ${pktMax} · RGB565 LE`);$('avance').textContent=`Preparado para enviar ${n} bloques. No cierres Bluefy.`;await handshake();await pause(200);let since=lastStatus;const startFrame=makeStart(blob.length);log('DIAL_START TX HEX: '+hex(startFrame));log('Receptor de notificaciones activo ANTES de DIAL_START; secuencia previa RX='+rxCount+', estado='+since);await writeAtomic(startFrame);log('DIAL_START enviado; buscando respuesta 1000 en notificaciones posteriores al estado '+since);await awaitStatus(1000,since,'DIAL_START_ACK');log('Inicio confirmado por BJ-1 (1000).');for(let i=0;i<n;i++){const part=blob.subarray(i*chunkSize,Math.min(blob.length,(i+1)*chunkSize));since=lastStatus;await writeAtomic(makeData(i+1,part));await awaitStatus(1001+i,since,`DIAL_CHUNK_ACK(${1001+i})`);if(i%20===0||i===n-1){const pc=Math.floor(94*(i+1)/n);$('progreso').value=pc;$('avance').textContent=`Enviados ${i+1} de ${n} bloques (${pc} %)`;if(i%100===0||i===n-1)log(`Bloques confirmados ${i+1}/${n}`);await pause(0);}}since=lastStatus;await writeAtomic(makeFinish(blob));await awaitStatus(2,since,'DIAL_FINISH_OK');$('progreso').value=100;$('avance').textContent='Transferencia confirmada por el dispositivo. Comprueba visualmente la pantalla.';log('BJ-1 confirmó fin de transferencia (estado 2). Esto NO demuestra que el dibujo sea visible.');}catch(e){$('avance').textContent='Transferencia detenida. Copia el diagnóstico.';log('ERROR: '+((e && e.message)||e));}finally{busy=false;buttons()}});
 $('copiar').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('registro').textContent);log('Diagnóstico copiado.')}catch(ignored){log('No se pudo copiar automáticamente; mantén pulsado el registro para seleccionar texto.')}});
-const supportsBLE=!!navigator.bluetooth;const secure=window.isSecureContext;const estadoPagina=$('estadoPagina');if(!supportsBLE){estadoPagina.className='diagnostico error';estadoPagina.innerHTML='<strong>Botones activos · Bluetooth no disponible aquí</strong>La vista previa funciona sin Bluetooth. Para conectarte necesitas abrir esta página desde una dirección HTTPS dentro de Bluefy; un archivo local puede no dar acceso Bluetooth.';}else{estadoPagina.className='diagnostico ok';estadoPagina.innerHTML='<strong>Aplicación cargada · Bluetooth disponible</strong>Pulsa «Probar botones» y después «Conectar BJ-1».';}buttons();log('Aura BJ-1 V6 preparada. JavaScript ejecutándose. HTTPS='+secure+'; Web Bluetooth='+supportsBLE+'.');if(!supportsBLE)log('Web Bluetooth no disponible en esta ventana. Abre la URL HTTPS dentro de Bluefy (iPhone).');window.addEventListener('error',e=>{log('ERROR DE PÁGINA: '+(e.message||e.type));estadoPagina.className='diagnostico error';});window.addEventListener('unhandledrejection',e=>{log('ERROR ASÍNCRONO: '+((e.reason && e.reason.message)||e.reason||'desconocido'));});
+window.auraStartupStep = 'comprobar Bluetooth';
+const supportsBLE=!!navigator.bluetooth;const secure=window.isSecureContext;const estadoPagina=$('estadoPagina');if(!supportsBLE){estadoPagina.className='diagnostico error';estadoPagina.innerHTML='<strong>Botones activos · Bluetooth no disponible aquí</strong>La vista previa funciona sin Bluetooth. Para conectarte necesitas abrir esta página desde una dirección HTTPS dentro de Bluefy; un archivo local puede no dar acceso Bluetooth.';}else{estadoPagina.className='diagnostico ok';estadoPagina.innerHTML='<strong>Aplicación cargada · Bluetooth disponible</strong>Pulsa «Probar botones» y después «Conectar BJ-1».';}buttons();log('Aura BJ-1 V7 preparada. JavaScript ejecutándose. HTTPS='+secure+'; Web Bluetooth='+supportsBLE+'.');if(!supportsBLE)log('Web Bluetooth no disponible en esta ventana. Abre la URL HTTPS dentro de Bluefy (iPhone).');window.addEventListener('error',e=>{log('ERROR DE PÁGINA: '+(e.message||e.type));estadoPagina.className='diagnostico error';});window.addEventListener('unhandledrejection',e=>{log('ERROR ASÍNCRONO: '+((e.reason && e.reason.message)||e.reason||'desconocido'));});
+
+window.auraStartupStep = 'lista';
+} catch (startupError) {
+  window.auraDetailedError = true;
+  window.auraReportStartup('Fallo en ' + window.auraStartupStep + ': ' + (startupError.message || startupError) + '\n' + (startupError.stack || ''));
+}
+})();
 </script>
 </body></html>
+
 
